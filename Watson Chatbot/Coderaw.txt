@@ -1,0 +1,91 @@
+!pip install requests==2.32.3
+!pip install ibm-watsonx-ai
+!pip install PyPDF2
+import json
+import requests
+from ibm_watsonx_ai.foundation_models import ModelInference
+from ibm_watsonx_ai import Credentials
+
+# ✅ Your credentials
+API_KEY = "hzPuIY9ArkA9AUC53ejUmKX-ZVx7CjZ9HXqYwZpHtLub"
+PROJECT_ID = "175e0636-b309-488b-a296-fc7a95fbd42d"
+MODEL_ID = "ibm/granite-13b-instruct-v2"
+
+# ✅ Setup Watsonx Connection
+credentials = Credentials(
+    url="https://us-south.ml.cloud.ibm.com",
+    api_key=API_KEY
+)
+
+model = ModelInference(
+    model_id=MODEL_ID,
+    credentials=credentials,
+    project_id=PROJECT_ID
+)
+
+print("✅ Watsonx Granite 13B model connected successfully!")
+
+from google.colab import files
+from PyPDF2 import PdfReader
+
+# ✅ Upload the PDF
+uploaded = files.upload()
+
+# ✅ Get filename
+file_name = list(uploaded.keys())[0]
+
+# ✅ Extract text from PDF
+reader = PdfReader(file_name)
+raw_text = ""
+for page in reader.pages:
+    raw_text += page.extract_text()
+
+print("\n📄 Extracted Text Preview:")
+print(raw_text[:500])  # preview first 500 characters
+
+print("\n📄 Extracted Text Preview:")
+print(raw_text[:500])  # show first 500 characters
+
+# ✅ Build a clean summarization prompt
+prompt = f"""
+You are a professional medical assistant.
+
+Here is a patient's medical report:
+
+{raw_text}
+
+Please summarize the key medical history, recent complaints, lab findings, medications, and doctor's notes in simple bullet points for the doctor to review quickly.
+"""
+
+# ✅ Generate Summary
+response = model.generate(prompt)
+summary = response['results'][0]['generated_text']
+
+# ✅ Display
+print("\n✅ Generated Summary:")
+print(summary)
+
+# ✅ Doctor asks a follow-up question
+doctor_question = input("👨‍⚕️ Enter your question about the patient's report: ")
+
+# ✅ Build prompt for QnA
+qa_prompt = f"""
+You are a professional medical assistant.
+
+Here is the summarized medical report:
+
+{summary}
+
+The doctor asks: {doctor_question}
+
+Answer clearly and concisely based on the report only.
+"""
+
+# ✅ Generate AI Answer
+response = model.generate(qa_prompt)
+answer = response['results'][0]['generated_text']
+
+# ✅ Display
+print("\n✅ AI Answer:")
+print(answer)
+

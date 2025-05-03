@@ -1,1 +1,98 @@
+# analyze.py
+from flask import Flask, render_template, request, jsonify
+from werkzeug.utils import secure_filename
+import os
+from PyPDF2 import PdfReader
+from ibm_watsonx_ai.foundation_models import ModelInference
+from ibm_watsonx_ai import Credentials
 
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = 'uploads'
+
+# WatsonX Credentials
+API_KEY = "hzPuIY9ArkA9AUC53ejUmKX-ZVx7CjZ9HXqYwZpHtLub"
+PROJECT_ID = "175e0636-b309-488b-a296-fc7a95fbd42d"
+MODEL_ID = "ibm/granite-13b-instruct-v2"
+
+credentials = Credentials(
+    url="https://us-south.ml.cloud.ibm.com",
+    api_key=API_KEY
+)
+
+model = ModelInference(
+    model_id=MODEL_ID,
+    credentials=credentials,
+    project_id=PROJECT_ID
+)
+
+# Global state (for demo only)
+summary_text = ""
+
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    file = request.files["pdf"]
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
+
+    reader = PdfReader(filepath)
+    raw_text = ""
+    for page in reader.pages:
+        raw_text += page.extract_text()
+
+    return jsonify({"text": raw_text[:5000000], "full_text": raw_text})
+
+
+@app.route("/summarize", methods=["POST"])
+def summarize():
+    global summary_text
+    data = request.get_json()
+    raw_text = data["text"]
+
+    prompt = f"""
+You are a professional medical assistant.
+
+Here is a patient's medical report:
+
+{raw_text}
+
+Please summarize the key medical history, recent complaints, lab findings, medications, and doctor's notes in simple bullet points for the doctor to review quickly.
+    """
+    response = model.generate(prompt)
+    summary_text = response["results"][0]["generated_text"]
+
+    return jsonify({"summary": summary_text})
+
+
+@app.route("/ask", methods=["POST"])
+def ask():
+    data = request.get_json()
+    question = data["question"]
+
+    qa_prompt = f"""
+You are a professional medical assistant.
+
+Here is the summarized medical report:
+
+{summary_text}
+
+The doctor asks: {question}
+
+Answer clearly and concisely based on the report only.
+    """
+    response = model.generate(qa_prompt)
+    answer = response["results"][0]["generated_text"]
+
+    return jsonify({"answer": answer})
+
+
+if __name__ == "__main__":
+    if not os.path.exists("uploads"):
+        os.makedirs("uploads")
+    app.run(debug=True)

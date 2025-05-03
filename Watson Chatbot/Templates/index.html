@@ -1,0 +1,93 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🩺 Watsonx Medical Analyzer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+  <h2 class="mb-4">🩺 Analyze Medical Reports using Watsonx AI</h2>
+
+  <!-- PDF Upload -->
+  <div class="mb-4">
+    <label for="pdf" class="form-label">📂 Upload Medical Report (PDF)</label>
+    <input class="form-control" type="file" id="pdf">
+    <button class="btn btn-primary mt-2" onclick="uploadPDF()">Upload & Extract</button>
+  </div>
+
+  <!-- Extracted Text -->
+  <div class="mb-4">
+    <label class="form-label">📄 Extracted Text Preview</label>
+    <textarea id="previewText" class="form-control" rows="6" readonly></textarea>
+    <button class="btn btn-success mt-2" onclick="generateSummary()">🧠 Generate Summary</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="mb-4">
+    <label class="form-label">✅ Summary</label>
+    <textarea id="summaryText" class="form-control" rows="6" readonly></textarea>
+  </div>
+
+  <!-- Doctor Question -->
+  <div class="mb-4">
+    <label class="form-label">👨‍⚕️ Ask a Question</label>
+    <input id="question" class="form-control" type="text" placeholder="e.g. What medications are the patient taking?">
+    <button class="btn btn-info mt-2" onclick="askQuestion()">💬 Ask</button>
+  </div>
+
+  <!-- AI Answer -->
+  <div class="mb-4">
+    <label class="form-label">🧠 AI Answer</label>
+    <textarea id="aiAnswer" class="form-control" rows="4" readonly></textarea>
+  </div>
+</div>
+
+<script>
+  let fullText = '';
+
+  function uploadPDF() {
+    const fileInput = document.getElementById('pdf');
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("pdf", file);
+
+    fetch("/upload", {
+      method: "POST",
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('previewText').value = data.text;
+      fullText = data.full_text;
+    });
+  }
+
+  function generateSummary() {
+    fetch("/summarize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: fullText })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('summaryText').value = data.summary;
+    });
+  }
+
+  function askQuestion() {
+    const question = document.getElementById('question').value;
+    fetch("/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: question })
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('aiAnswer').value = data.answer;
+    });
+  }
+</script>
+</body>
+</html>

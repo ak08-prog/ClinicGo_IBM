@@ -1,0 +1,6 @@
+# Example: pip install -r requirements.txt
+numpy>=1.22.2
+opencv-python>=4.6.0
+ultralytics
+
+

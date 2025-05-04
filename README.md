@@ -25,21 +25,17 @@ ClinicGo/
 │   └── Watson_Chatbot/
 │       ├── chatbot_interface.py
 │       └── chatbot_logic.py
-│
 ├── Modules/
 │   ├── Analyzer.ipynb        # Medical report analysis
 │   ├── qr_code.ipynb         # QR check-in system
 │   ├── trend_analysis.ipynb  # Predictive analytics
 │   └── voicetotext.ipynb     # Speech processing
-│
 ├── Computer_Vision/
 │   └── yolov8_clinic_counter.py
-│
 ├── Documentation/
 │   ├── sample_medical_report.pdf
 │   └── user_guide.md
-│
-└── README.md                 # Main documentation
+└── README.md                 # Main documentation (root level)
 
 
 ## Technologies & AI Models Used

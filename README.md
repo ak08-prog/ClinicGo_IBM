@@ -16,17 +16,21 @@ ClinicGo is an AI-powered platform built to streamline patient management, enhan
 
 
 ClinicGo/
-├── Analyzer.ipynb             # Lab report summarization and Q&A
-├── qr_code.ipynb              # QR-code based check-in system
-├── trend_analysis.ipynb       # Predictive traffic/load analytics
-├── voicetotext.ipynb          # Watson STT for transcription
-├── yolov8_clinic_counter.py   # YOLOv8-based patient crowd estimator
-├── watson_chatbot.rar         # Custom chatbot with Watson Assistant
-├── sample_medical_report.pdf  # Example document for testing AI analyzer
-├── Frontend/                  # UI components and media files
-│   ├── LICENSE
-│   ├── output (2).mp4
-│   └── ...
+├── Frontend/                   # Frontend interface files
+│   ├── about.py           # Main UI component
+│    |── demo-video.mp4     # Example: output (2).mp4
+│
+├── Watson_Chatbot/            # Chatbot components
+│   ├── chatbot_interface.py
+│   
+│
+├── Analyzer.ipynb             # Medical report analysis notebook
+├── qr_code.ipynb              # QR check-in system notebook
+├── trend_analysis.ipynb       # Predictive analytics notebook
+├── voicetotext.ipynb          # Speech-to-text processing
+├── yolov8_clinic_counter.py   # Vision-based patient counter
+├── sample_medical_report.pdf  # Test document
+└── README.md                  # Project documentation
 
 
 ## Technologies & AI Models Used
